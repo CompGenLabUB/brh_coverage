@@ -1,6 +1,6 @@
 library(ggplot2);
-library(gridExtra);
-library("grid");
+library(ggpubr)
+
 arguments <- commandArgs(TRUE);
 INPUT   <- arguments[1];
 OUTPUT  <- arguments[2];
@@ -18,7 +18,7 @@ BRHcov <- read.table(file=INPUT, header=F, comment.char = "");
                xlim(0,100) + ylim(0,100) +
                theme_bw()  +
                theme(legend.position = "none") +  stat_density2d(color="black", alpha=0.8) +
-               geom_abline(aes(slope=1), linetype="dashed");
+               geom_abline(aes(slope=1, intercept=0), linetype="dashed");
 
 
     trans<-ggplot(BRHcov, aes(x=V3)) +
@@ -33,29 +33,15 @@ BRHcov <- read.table(file=INPUT, header=F, comment.char = "");
             geom_vline(xintercept= median(BRHcov$V4), linetype="dashed") +
             theme_bw() + coord_flip();
 
-    junk<-ggplot(mtcars, aes(x = wt, y = mpg)) +
-            ggtitle(paste("BRHs ", PROGRAM, "\nn = ", nrow(BRHcov))) +
-            geom_blank() +
-            theme_bw() +
-            theme(panel.border     = element_blank(),
-                  panel.grid.major = element_blank(),
-                  panel.grid.minor = element_blank(),
-                  line             = element_blank(),
-                  axis.text.x      = element_blank(),
-                  axis.text.y      = element_blank(),
-                  plot.title       = element_text(
-                                                  lineheight = 2,
-                                                  vjust      = 1,
-                                                  hjust      =.5,
-                                                  size       = 18,
-                                                  ),
-                  plot.margin = unit(c(5, 1, 0.5, 0.5), "lines")
-                  ) +
-            xlab("") +
-            ylab("");
-
-    gplots <- arrangeGrob(trans, junk, scatt, subj, ncol=2);
-    class(gplots) <- c("arrange","ggplot", class(gplots));
-    print.arrange <- function(x) grid.draw(x);
-    ggsave(file=OUTPUT, gplots);
+    title <- ggparagraph(text=paste("BRHs ", PROGRAM, "\nn = ", nrow(BRHcov)),
+                                       color = "black", face = "bold", size = 12, );
+    arranged <- ggarrange(trans + rremove("x.title"), title, scatt, subj + rremove("y.title"), ncol=2, nrow=2, align="hv");
+    ggexport(arranged, filename=OUTPUT);
+    #png(filename=OUTPUT);
+    #arrangeGrob(trans + rremove("x.title"), junk, scatt, subj + rremove("y.title"), ncol=2);
+    #dev.off();
+    #gplots <- arrangeGrob(trans, junk, scatt, subj, ncol=2);
+    #class(gplots) <- c("arrange","ggplot", class(gplots));
+    #print.arrange <- function(x) grid.draw(x);
+    #ggsave(file=OUTPUT, gplots);
 #ggsave(file=OUTPUT, gplots);
