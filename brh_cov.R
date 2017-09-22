@@ -1,6 +1,6 @@
 library(ggplot2);
-library(ggpubr)
-
+library(svglite);
+library(ggpubr);
 arguments <- commandArgs(TRUE);
 INPUT   <- arguments[1];
 OUTPUT  <- arguments[2];
@@ -22,13 +22,13 @@ BRHcov <- read.table(file=INPUT, header=F, comment.char = "");
 
 
     trans<-ggplot(BRHcov, aes(x=V3)) +
-            geom_bar(fill="#3d9fac", alpha=0.8, binwidth=1, position="identity") +
+            geom_histogram(fill="#3d9fac", alpha=0.8, binwidth=1, position="identity") +
             xlab(paste("\n", QUERY, " Coverage\n")) + ylab("Count\n") + xlim(0,100) +
             geom_vline(xintercept= median(BRHcov$V3), linetype="dashed") +
             theme_bw();
 
     subj<-ggplot(BRHcov, aes(x=V4)) +
-            geom_bar(fill="#ef5030", alpha=0.8, binwidth=1, position="identity") +
+            geom_histogram(fill="#ef5030", alpha=0.8, binwidth=1, position="identity") +
             xlab(paste(SUBJECT, " Coverage\n")) + ylab("\nCount") + xlim(0,100) +
             geom_vline(xintercept= median(BRHcov$V4), linetype="dashed") +
             theme_bw() + coord_flip();
@@ -36,7 +36,7 @@ BRHcov <- read.table(file=INPUT, header=F, comment.char = "");
     title <- ggparagraph(text=paste("BRHs ", PROGRAM, "\nn = ", nrow(BRHcov)),
                                        color = "black", face = "bold", size = 12, );
     arranged <- ggarrange(trans + rremove("x.title"), title, scatt, subj + rremove("y.title"), ncol=2, nrow=2, align="hv");
-    ggexport(arranged, filename=OUTPUT);
+    ggexport(arranged, filename=OUTPUT, width=500, height=500);
     #png(filename=OUTPUT);
     #arrangeGrob(trans + rremove("x.title"), junk, scatt, subj + rremove("y.title"), ncol=2);
     #dev.off();
